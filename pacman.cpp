@@ -176,6 +176,8 @@ public:
 
 	// ヒーローによってエサが食べられて消える、という処理をする関数
 	void eaten(int y, int x) { data[y][x] = Const::ROAD; }
+	// ROADに変化させる関数 eatenと同義
+	void toRoad(int y, int x) { data[y][x] = Const::ROAD; }
 
 	// 座標(y, x)の場所がエサならtrue、それ以外ならばfalseを返す関数
 	bool isFood(int y, int x) { return data[y][x] == Const::FOOD; }
@@ -183,6 +185,8 @@ public:
 	// 座標(y, x)の場所が壁ならtrue、それ以外ならばfalseを返す関数
 	bool isWall(int y, int x) { return data[y][x] == Const::WALL; }
 	bool isTrap(int y, int x) { return data[y][x] == Const::TRAP; }
+	bool isRecv(int y, int x) { return data[y][x] == Const::RECV; }
+
 
 	// マップ上に現在エサが何個残っているかを数える関数
 	int countUneatenFoods()
@@ -245,14 +249,25 @@ public:
 		}
 	}
 
+	// TRAPかチェックする関数
 	void checktrap(Map *m)
 	{
 		if ((*m).isTrap(y, x))
 		{
 			trapped = true;
+			(*m).toRoad(y, x);
 		}
 	}
 
+	// RECVかチェックする関数
+	void checkRecv(Map *m){
+		if ((*m).isRecv(y, x)){
+			trapped = false;
+			(*m).toRoad(y, x);
+		}
+	}
+
+	// 餌を食べる一連の関数
 	void caneat(Map *m)
 	{
 		if ((*m).isFood(y, x))
@@ -260,27 +275,38 @@ public:
 			(*m).eaten(y, x);
 		}
 	}
+
+	// 壁を判定し、なければその方向に進む関数
 	void checkmove(Map *m)
 	{
 		if (!(*m).isWall(y + dy, x + dx))
 		{
 			y = y + dy;
 			x = x + dx;
-		} // 条件式の!（否定）に注意
+		}
 	}
 
+	// マップのアイテムチェック + 動作
 	void behavior(Map *m)
 	{
-		checkmove(m);
-		caneat(m);
-		checktrap(m);
+		checkmove(m); // 壁判定
+		caneat(m); // 餌判定
+		checktrap(m); // トラップ判定
+		checkRecv(m); // RECV判定
 	}
 
+	// 次の方向を決める関数
 	void setNextDirection(int dx, int dy)
 	{
 		dx = dx;
 		dy = dy;
 	}
+
+	// ヒーローのスピードを決定する関数
+	void setmovespeed(float t){
+		wait = t * wait_max;
+	}
+
 	// ヒーローの座標を更新する関数
 	void move(Map *m, int direction)
 	{
@@ -311,39 +337,19 @@ public:
 			behavior(m);
 			break;
 		}
-		wait = wait_max;
-	}
-	void slowmove(Map *m, int direction)
-	{
-		wait = wait_max;
-		switch (direction)
-		{
-		case Const::UP:
-			setNextDirection(dy = -1, dx = 0);
-			behavior(m);
-			break;
 
-		case Const::RIGHT:
-			setNextDirection(dy = 0, dx = 1);
-			behavior(m);
-			break;
-
-		case Const::DOWN:
-			setNextDirection(dy = 1, dx = 0);
-			behavior(m);
-			break;
-
-		case Const::LEFT:
-			setNextDirection(dy = 0, dx = -1);
-			behavior(m);
-			break;
+		if (trapped == true){
+			setmovespeed(3.0);
 		}
+
+		else if (trapped == false){
+			setmovespeed(1.0);
+		}
+		
 	}
 
 	void moving(Map *mp, int ch)
 	{
-		if (trapped == false)
-		{
 			if (ch == KEY_UP)
 			{
 				move(mp, Const::UP);
@@ -360,26 +366,6 @@ public:
 			{
 				move(mp, Const::LEFT);
 			}
-		}
-		else if (trapped == true)
-		{
-			if (ch == KEY_UP)
-			{
-				slowmove(mp, Const::UP);
-			}
-			else if (ch == KEY_RIGHT)
-			{
-				slowmove(mp, Const::RIGHT);
-			}
-			else if (ch == KEY_DOWN)
-			{
-				slowmove(mp, Const::DOWN);
-			}
-			else if (ch == KEY_LEFT)
-			{
-				slowmove(mp, Const::LEFT);
-			}
-		}
 	}
 
 	// ヒーロー「コ」「ロ」（😃😊も可）を指定の座標に表示する関数
