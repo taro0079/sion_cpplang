@@ -187,7 +187,6 @@ public:
 	bool isTrap(int y, int x) { return data[y][x] == Const::TRAP; }
 	bool isRecv(int y, int x) { return data[y][x] == Const::RECV; }
 
-
 	// マップ上に現在エサが何個残っているかを数える関数
 	int countUneatenFoods()
 	{
@@ -260,8 +259,10 @@ public:
 	}
 
 	// RECVかチェックする関数
-	void checkRecv(Map *m){
-		if ((*m).isRecv(y, x)){
+	void checkRecv(Map *m)
+	{
+		if ((*m).isRecv(y, x))
+		{
 			trapped = false;
 			(*m).toRoad(y, x);
 		}
@@ -290,7 +291,7 @@ public:
 	void behavior(Map *m)
 	{
 		checkmove(m); // 壁判定
-		caneat(m); // 餌判定
+		caneat(m);	  // 餌判定
 		checktrap(m); // トラップ判定
 		checkRecv(m); // RECV判定
 	}
@@ -303,7 +304,8 @@ public:
 	}
 
 	// ヒーローのスピードを決定する関数
-	void setmovespeed(float t){
+	void setmovespeed(float t)
+	{
 		wait = t * wait_max;
 	}
 
@@ -338,34 +340,35 @@ public:
 			break;
 		}
 
-		if (trapped == true){
+		if (trapped == true)
+		{
 			setmovespeed(3.0);
 		}
 
-		else if (trapped == false){
+		else if (trapped == false)
+		{
 			setmovespeed(1.0);
 		}
-		
 	}
 
 	void moving(Map *mp, int ch)
 	{
-			if (ch == KEY_UP)
-			{
-				move(mp, Const::UP);
-			}
-			else if (ch == KEY_RIGHT)
-			{
-				move(mp, Const::RIGHT);
-			}
-			else if (ch == KEY_DOWN)
-			{
-				move(mp, Const::DOWN);
-			}
-			else if (ch == KEY_LEFT)
-			{
-				move(mp, Const::LEFT);
-			}
+		if (ch == KEY_UP)
+		{
+			move(mp, Const::UP);
+		}
+		else if (ch == KEY_RIGHT)
+		{
+			move(mp, Const::RIGHT);
+		}
+		else if (ch == KEY_DOWN)
+		{
+			move(mp, Const::DOWN);
+		}
+		else if (ch == KEY_LEFT)
+		{
+			move(mp, Const::LEFT);
+		}
 	}
 
 	// ヒーロー「コ」「ロ」（😃😊も可）を指定の座標に表示する関数
